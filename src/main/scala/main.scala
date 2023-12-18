@@ -8,7 +8,7 @@ import cats.implicits._
 val solutions: Map[Int, Map[Int, Solution]] = Map(
   2017 -> Map(
     1 -> Solution(y2017.day_01.part1, y2017.day_01.part2),
-    2 -> Solution(_ => IO("Not implemented yet"), _ => IO("Not implemented yet"))
+    2 -> Solution(y2017.day_02.part1, y2017.day_02.part2)
   )
 )
 

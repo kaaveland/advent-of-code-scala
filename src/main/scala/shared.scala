@@ -100,7 +100,7 @@ object AdventOfCodeHttp {
       } { stream => IO(stream.close()).handleErrorWith(_ => IO.unit) }
       content <- fp.use { fp => IO(new String(fp.readAllBytes())).map(_.trim) }
     } yield content
-
+    
     fromFile.recoverWith { case e: FileNotFoundException =>
       for {
         f <- fallback
@@ -115,7 +115,7 @@ object AdventOfCodeHttp {
 
   def downloadYear(year: Int): IO[List[(Int, String)]] = client.flatMap { resource =>
     resource.use { client =>
-      (Range(1, 25)).toList.traverse { day =>
+      Range(1, 25).toList.traverse { day =>
         fetchDay(client, year, day).map(data => (day, data))
       }
     }
