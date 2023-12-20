@@ -7,7 +7,7 @@ import org.scalatest.funsuite.AnyFunSuiteLike
 
 class day_02Test extends AnyFunSuiteLike {
   test("checksum examples") {
-    val ex = "5 1 9 5\n7 5 3\n2 4 6 8";
+    val ex = "5 1 9 5\n7 5 3\n2 4 6 8"
     assert(checksum(ex) == 18)
   }
   test("checksum divisible examples") {

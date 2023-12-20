@@ -30,26 +30,26 @@ object AdventOfCodeInputs {
 }
 
 object AdventOfCodeFs {
-  private val dataDir = IO(Path.of("input")).flatMap(p => IO(p.toFile.mkdir()).map(_ => p))
+  private val dataDir = IO(Path.of("input")).flatMap(p => IO.blocking(p.toFile.mkdir()).map(_ => p))
 
   private def coordinates(year: Int, day: Int): IO[Path] =
     dataDir.map(p => p.resolve(Paths.get(year.toString, "day_%02d".format(day), "input")))
 
   def save(year: Int, day: Int, data: String): IO[String] = for {
     p <- coordinates(year, day)
-    _ <- IO(p.getParent.toFile.mkdirs())
+    _ <- IO.blocking(p.getParent.toFile.mkdirs())
     fp = Resource.make {
-      IO(new FileOutputStream(p.toFile))
-    } { stream => IO(stream.close()).handleErrorWith(_ => IO.unit) }
-    _ <- fp.use { fp => IO(fp.write(data.getBytes())) }
+      IO.blocking(new FileOutputStream(p.toFile))
+    } { stream => IO.blocking(stream.close()).handleErrorWith(_ => IO.unit) }
+    _ <- fp.use { fp => IO.blocking(fp.write(data.getBytes())) }
   } yield data
 
   def load(year: Int, day: Int): IO[String] = for {
     p <- coordinates(year, day)
     fp = Resource.make {
-      IO(new FileInputStream(p.toFile))
-    } { stream => IO(stream.close()).handleErrorWith(_ => IO.unit) }
-    data <- fp.use { fp => IO(new String(fp.readAllBytes())) }
+      IO.blocking(new FileInputStream(p.toFile))
+    } { stream => IO.blocking(stream.close()).handleErrorWith(_ => IO.unit) }
+    data <- fp.use { fp => IO.blocking(new String(fp.readAllBytes())) }
   } yield data
 
 }
@@ -96,19 +96,19 @@ object AdventOfCodeHttp {
     val fromFile: IO[String] = for {
       p <- path
       fp = Resource.make {
-        IO(new FileInputStream(p))
-      } { stream => IO(stream.close()).handleErrorWith(_ => IO.unit) }
-      content <- fp.use { fp => IO(new String(fp.readAllBytes())).map(_.trim) }
+        IO.blocking(new FileInputStream(p))
+      } { stream => IO.blocking(stream.close()).handleErrorWith(_ => IO.unit) }
+      content <- fp.use { fp => IO.blocking(new String(fp.readAllBytes())).map(_.trim) }
     } yield content
-    
+
     fromFile.recoverWith { case e: FileNotFoundException =>
       for {
         f <- fallback
         p <- path
         fp = Resource.make {
-          IO(new FileOutputStream(p))
-        } { stream => IO(stream.close()).handleErrorWith(_ => IO.unit) }
-        _ <- fp.use { fp => IO(fp.write(f.getBytes())) }
+          IO.blocking(new FileOutputStream(p))
+        } { stream => IO.blocking(stream.close()).handleErrorWith(_ => IO.unit) }
+        _ <- fp.use { fp => IO.blocking(fp.write(f.getBytes())) }
       } yield f
     }
   }

@@ -3,12 +3,18 @@ package com.kaaveland.aoc
 import AdventOfCodeInputs.{dataFor, storeYear}
 
 import cats.effect.{ExitCode, IO, IOApp}
-import cats.implicits._
+import cats.implicits.*
+
+import java.time.{Duration, Instant}
 
 val solutions: Map[Int, Map[Int, Solution]] = Map(
   2017 -> Map(
     1 -> Solution(y2017.day_01.part1, y2017.day_01.part2),
-    2 -> Solution(y2017.day_02.part1, y2017.day_02.part2)
+    2 -> Solution(y2017.day_02.part1, y2017.day_02.part2),
+    3 -> Solution(y2017.day_03.part1, s => IO("Not implemented yet"))
+  ),
+  2023 -> Map(
+    20 -> Solution(y2023.day_20.part1, y2023.day_20.part2)
   )
 )
 
@@ -43,21 +49,27 @@ def lookup(coordinates: TimeCoordinates): List[(Int, Int, Solution)] = coordinat
     solutions.getOrElse(y, Map.empty).get(d).map(sol => List((y, d, sol))).getOrElse(List.empty)
 }
 
+private def fmtMicros(micros: Long): String = if (micros < 3000) {
+  s"${micros}μs"
+} else {
+  s"${micros / 1000}ms"
+}
+
 def runSolutions(coordinates: TimeCoordinates): IO[String] = {
   val results = lookup(coordinates).parTraverse { case (year, day, sol) =>
     for {
       inp <- dataFor(year, day)
-      before <- IO(System.currentTimeMillis())
+      before <- IO(Instant.now())
       p1 <- sol.part1(inp)
-      afterP1 <- IO(System.currentTimeMillis())
+      afterP1 <- IO(Instant.now())
       p2 <- sol.part2(inp)
-      afterP2 <- IO(System.currentTimeMillis())
-      rt1 = String.format("%d", afterP1 - before)
-      rt2 = String.format("%d", afterP2 - afterP1)
+      afterP2 <- IO(Instant.now())
+      rt1 = fmtMicros(Duration.between(before, afterP1).toNanos / 1000)
+      rt2 = fmtMicros(Duration.between(afterP1, afterP2).toNanos / 1000)
     } yield (
       year,
       day,
-      s"Year $year day $day part 1: ${rt1}ms\n$p1\nYear $year day $day part 2: ${rt2}ms\n$p2\n"
+      s"Year $year day $day part 1: ${rt1}\n$p1\nYear $year day $day part 2: ${rt2}\n$p2"
     )
   }
   val all = results.map { r =>
@@ -68,10 +80,11 @@ def runSolutions(coordinates: TimeCoordinates): IO[String] = {
       .mkString("\n")
   }
   for {
-    before <- IO(System.currentTimeMillis())
+    before <- IO(Instant.now())
     text <- all
-    after <- IO(System.currentTimeMillis())
-  } yield s"$text\nTotal time including I/O: ${after - before}ms\n"
+    after <- IO(Instant.now())
+    dur = Duration.between(before, after).toNanos / 1000
+  } yield s"$text\nTotal time including I/O: ${fmtMicros(dur)}\n"
 }
 
 object main extends IOApp {
@@ -91,7 +104,10 @@ object main extends IOApp {
 
   def runSolution(args: List[String]): IO[ExitCode] = parseTime(args) match {
     case Right(tc) =>
-      runSolutions(tc).flatMap(results => IO.print(results)).map(_ => ExitCode.Success)
+      (0 to 2).toList // TODO: Should take a cmdline param to decide whether to do this, we do it to preheat the JVM JIT
+        .map(_ => runSolutions(tc).flatMap(results => IO.unit))
+        .sequence
+        .flatMap(_ => runSolutions(tc).flatMap(IO.println).map(_ => ExitCode.Success))
     case Left(err) => IO.println(err).map(_ => ExitCode.Error)
   }
 
