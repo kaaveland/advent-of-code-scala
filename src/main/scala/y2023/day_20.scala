@@ -21,13 +21,11 @@ object day_20 {
   sealed trait Memory
   private object Memory {
     case class FlipFlop(var on: Boolean) extends Memory
-
     case class Conj(mem: mutable.Map[String, Boolean]) extends Memory
-
     case object Broadcast extends Memory
   }
   private val machineKind: Parser0[MachineKind] =
-    Parser.char('&').map(_ => MachineKind.Conj) | Parser.char('%').map(_ => MachineKind.FlipFlop) | Parser.pure(
+    Parser.char('&').as(MachineKind.Conj) | Parser.char('%').as(MachineKind.FlipFlop) | Parser.pure(
       MachineKind.Broadcast
     )
   private val name = Rfc5234.alpha.rep.string
@@ -120,11 +118,11 @@ object day_20 {
       observe: String,
       lookFor: Boolean
   ): (Long, Long, Long) = {
-    val work = new mutable.Queue[(String, String, Boolean)]()
+    val work = new mutable.ArrayDeque[(String, String, Boolean)]()
     work.append(("button", "broadcaster", false))
     var (lo, hi, found) = (0L, 0L, 0L)
     while (work.nonEmpty) {
-      work.dequeue() match {
+      work.removeHead() match {
         case (source, dest, signal) =>
           if (signal) {
             hi += 1
@@ -138,7 +136,7 @@ object day_20 {
             case Some(recipient) =>
               recipient.receiveSignal(signal, source) match {
                 case Some(nextSignal) =>
-                  work.enqueueAll(recipient.outputs.map { next => (dest, next, nextSignal) })
+                  work.addAll(recipient.outputs.map { next => (dest, next, nextSignal) })
                 case _ => ()
               }
             case _ => ()
