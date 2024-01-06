@@ -78,7 +78,7 @@ def runSolutions(coordinates: TimeCoordinates): IO[String] = {
     } yield (
       year,
       day,
-      s"Year $year day $day part 1: ${rt1}\n$p1\nYear $year day $day part 2: ${rt2}\n$p2"
+      s"Year $year day $day part 1: $rt1\n$p1\nYear $year day $day part 2: $rt2\n$p2"
     )
   }
   val all = results.map { r =>

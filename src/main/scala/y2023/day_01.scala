@@ -3,10 +3,7 @@ package y2023
 
 object day_01 {
 
-  def numericValue(s: Array[Char]): Option[Int] = s.headOption match {
-    case Some(c) if c.isDigit => Some(c.toInt - '0'.toInt)
-    case _ => None
-  }
+  def numericValue(s: Array[Char]): Option[Int] = s.headOption.filter(_.isDigit).map(_.asDigit)
   private val numberWords =
     Vector("one", "two", "three", "four", "five", "six", "seven", "eight", "nine").map(_.toCharArray)
 
@@ -18,9 +15,9 @@ object day_01 {
       .map { case (_, idx) => idx + 1 }
   }
 
-  private def firstNum(s: List[Array[Char]]): Int = s.map(numericValue).find(_.isDefined).flatten.get
+  private def firstNum(s: List[Array[Char]]): Int = s.iterator.map(numericValue).find(_.isDefined).flatten.get
   private def firstNumIncludingWords(s: List[Array[Char]]): Int =
-    s.map { tail => numericValue(tail).orElse(numberWordValue(tail)) }.find(_.isDefined).flatten.get
+    s.iterator.map { tail => numericValue(tail).orElse(numberWordValue(tail)) }.find(_.isDefined).flatten.get
 
   private def tailsOf(s: String) = s.linesIterator.filter(_.nonEmpty).map(_.toCharArray.tails.toList)
 
