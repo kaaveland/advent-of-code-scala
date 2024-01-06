@@ -13,6 +13,8 @@ libraryDependencies ++= Seq(
 )
 enablePlugins(NativeImagePlugin)
 
+Global / excludeLintKeys := Set(idePackagePrefix, nativeImageVersion)
+
 lazy val root = (project in file("."))
   .settings(
     name := "advent-of-code-4s",

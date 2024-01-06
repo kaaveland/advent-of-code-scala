@@ -6,6 +6,9 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.implicits.*
 
 import java.time.{Duration, Instant}
+extension [A, B](f: A => B) {
+  def intoIOString: A => IO[String] = (a: A) => IO { f(a).toString }
+}
 
 val solutions: Map[Int, Map[Int, Solution]] = Map(
   2017 -> Map(
@@ -14,6 +17,7 @@ val solutions: Map[Int, Map[Int, Solution]] = Map(
     3 -> Solution(y2017.day_03.part1, s => IO("Not implemented yet"))
   ),
   2023 -> Map(
+    1 -> Solution(y2023.day_01.part1.intoIOString, y2023.day_01.part2.intoIOString),
     20 -> Solution(y2023.day_20.part1, y2023.day_20.part2),
     21 -> Solution(y2023.day_21.part1, y2023.day_21.part2)
   ),
@@ -109,7 +113,7 @@ object main extends IOApp {
 
   def runSolution(args: List[String]): IO[ExitCode] = parseTime(args) match {
     case Right(tc) =>
-      (0 to 2).toList // TODO: Should take a cmdline param to decide whether to do this, we do it to preheat the JVM JIT
+      (0 until 4).toList // TODO: Should take a cmdline param to decide whether to do this, we do it to preheat the JVM JIT
         .map(_ => runSolutions(tc).flatMap(results => IO.unit))
         .sequence
         .flatMap(_ => runSolutions(tc).flatMap(IO.println).map(_ => ExitCode.Success))
