@@ -19,6 +19,7 @@ val solutions: Map[Int, Map[Int, Solution]] = Map(
   2023 -> Map(
     1 -> Solution(y2023.day_01.part1.intoIOString, y2023.day_01.part2.intoIOString),
     2 -> Solution(y2023.day_02.part1.intoIOString, y2023.day_02.part2.intoIOString),
+    3 -> Solution(y2023.day_03.part1.intoIOString, y2023.day_03.part2.intoIOString),
     20 -> Solution(y2023.day_20.part1, y2023.day_20.part2),
     21 -> Solution(y2023.day_21.part1, y2023.day_21.part2)
   ),
