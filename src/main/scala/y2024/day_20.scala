@@ -3,7 +3,6 @@ package y2024
 
 import cats.effect.IO
 
-import java.util
 import scala.collection.mutable
 
 object day_20 {
@@ -30,16 +29,16 @@ object day_20 {
     }
   }
 
-  def bfs(tiles: Set[Pos], pos: Pos): (java.util.HashMap[Int, Int], Map[Pos, Pos]) = {
+  def bfs(tiles: Set[Pos], pos: Pos): (mutable.LongMap[Int], Map[Pos, Pos]) = {
     val work = mutable.Queue.empty[(Pos, Option[Pos], Int)]
     work.enqueue((pos, None, 0))
-    val distances = new util.HashMap[Int, Int]()
+    val distances = mutable.LongMap.empty[Int]
     val parents = mutable.HashMap.empty[Pos, Pos]
 
     while (work.nonEmpty) {
       val (pos, parent, cost) = work.dequeue()
-      if (tiles.contains(pos) && !distances.containsKey(key(pos))) {
-        distances.put(key(pos), cost)
+      if (tiles.contains(pos) && !distances.contains(key(pos))) {
+        distances(key(pos)) = cost
         parent.foreach(p => { parents(pos) = p; })
         List((0, 1), (0, -1), (1, 0), (-1, 0)).foreach { (dx, dy) =>
           work.enqueue(((pos._1 + dx, pos._2 + dy), Some(pos), cost + 1))
@@ -74,18 +73,21 @@ object day_20 {
     (x & 0xff) | ((y & 0xff) << 8)
   }
 
-  def findCheats(distances: java.util.HashMap[Int, Int], path: List[Pos], cheatLen: Int, minGain: Int): Int = {
+  def findCheats(distances: mutable.LongMap[Int], path: List[Pos], cheatLen: Int, minGain: Int): Int = {
     val offsets = manhattanOffsets(cheatLen)
     var count = 0
-    for {
-      (x, y) <- path
-      remaining = distances.get((x & 0xff) | ((y & 0xff) << 8))
-      (dx, dy, cost) <- offsets
-      (nx, ny) = (x + dx, y + dy)
-      gain = distances.getOrDefault((nx & 0xff) | ((ny & 0xff) << 8), -100000) - cost - remaining
-      if gain >= minGain
-    } {
-      count += 1
+    var cur = path
+    while (cur.nonEmpty) {
+      val (x, y) = cur.head
+      cur = cur.tail
+      val remaining = distances((x & 0xff) | ((y & 0xff) << 8))
+      offsets.view.foreach { (dx, dy, cost) =>
+        val (nx, ny) = (x + dx, y + dy)
+        val gain = distances.getOrElse((nx & 0xff) | ((ny & 0xff) << 8), -100000) - cost - remaining
+        if (gain >= minGain) {
+          count += 1
+        }
+      }
     }
     count
   }
