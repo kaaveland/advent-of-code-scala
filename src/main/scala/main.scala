@@ -25,7 +25,8 @@ val solutions: Map[Int, Map[Int, Solution]] = Map(
   ),
   2024 -> Map(
     1 -> Solution(y2024.day_01.part1, y2024.day_01.part2),
-    6 -> Solution(y2024.day_06.part1, y2024.day_06.part2)
+    6 -> Solution(y2024.day_06.part1, y2024.day_06.part2),
+    20 -> Solution(y2024.day_20.part1, y2024.day_20.part2)
   )
 )
 
